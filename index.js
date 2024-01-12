@@ -16,7 +16,7 @@ app.use("/api/messages",messagesroute);
 
 app.get("/",(req,res)=>{
     res.setHeader("Access-Control-Allow-Credentials","true");
-}
+})
 
 mongoose.connect(DB).then(()=>{
     console.log("db connected")
