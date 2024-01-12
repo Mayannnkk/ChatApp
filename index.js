@@ -8,6 +8,10 @@ const app= express();
 
 const DB='mongodb+srv://heyitsmank:mankmongo@cluster0.rxgnrcs.mongodb.net/chatapp?retryWrites=true&w=majority'
 
+app.get("/",(req,res)=>{
+    res.setHeader("Access-Control-Allow-Credentials","true");
+    res.send("backend is running")
+})
 app.use(cors({
     origin:["http://localhost:3000","https://chat-app-uhoh.onrender.com"]
 }))  
