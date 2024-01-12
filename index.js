@@ -8,15 +8,14 @@ const app= express();
 
 const DB='mongodb+srv://heyitsmank:mankmongo@cluster0.rxgnrcs.mongodb.net/chatapp?retryWrites=true&w=majority'
 
-app.use(cors())  
+app.use(cors({
+    origin:["http://localhost:3000","https://chat-app-uhoh.onrender.com"]
+}))  
 app.use(express.json());
 
 app.use("/api/auth",userroutes); 
 app.use("/api/messages",messagesroute); 
 
-app.get("/",(req,res)=>{
-    res.setHeader("Access-Control-Allow-Credentials","true");
-})
 
 mongoose.connect(DB).then(()=>{
     console.log("db connected")
