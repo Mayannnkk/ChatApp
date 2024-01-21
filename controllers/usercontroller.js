@@ -4,22 +4,25 @@ const bcrypt = require("bcrypt");
 module.exports.register = async (req, res, next) => {
     try {
         const { username, email, password } = req.body;
-        // const usernamecheck = await user.findOne({ username });
-        // if (usernamecheck) {
-        //     return res.json({ msg: "Username already used", status: false })
-        // }
-        // const emailcheck = await user.findOne({ email });
-        // if (emailcheck) {
-        //     return res.json({ msg: "Email already used", status: false });
-        // }
-        const hashedpassword = await bcrypt.hash(password, 10);
-        const collection = await user.create({
-            username,
-            email,
-            password: hashedpassword
-        })
-        delete collection.password;
-        return res.json({ status: true, collection })
+
+        const ifUser = await user.findOne({ username });
+        // console.log(ifUser)
+        if (!ifUser) {
+            const hashedpassword = await bcrypt.hash(password, 10);
+            const collection = await user.create({
+                username,
+                email,
+                password: hashedpassword,
+                profilePic:''
+            })
+            delete collection.password;
+            const User = await user.findOne({ username });
+            // console.log(User)
+            return res.json({ status: true, User })
+        }
+        else {
+            return res.json({ status: false, ifUser })
+        }
     }
     catch (ex) {
         next(ex);
@@ -60,21 +63,27 @@ module.exports.adduser = async (req, res, next) => {
     try {
         const { currentuser, contacttobeadded } = req.body;
         const curruser = await user.findOne({ username: currentuser });
-        // const otheruser = await user.findOne({username:c});
-        // let curruser = {username:currentuser};
+    
         let array = curruser.addedContacts;
         let present = array.find((x) => x.username == contacttobeadded.username)
         if (present != undefined) return (res.json("error"));
         else {
             let add = [...array];
             add.reverse();
-            add.push({ _id: contacttobeadded._id, username: contacttobeadded.username })
+            add.push({ _id: contacttobeadded._id, username: contacttobeadded.username, profilePic: contacttobeadded.profilePic })
             add.reverse();
 
-            var unique = [...new Set(add)]
-            // console.log(unique)
-            let updatedcontacts = { $set: { addedContacts: unique } };
+            let updatedcontacts = { $set: { addedContacts: add } };
             await user.updateOne(curruser, updatedcontacts)
+
+            let array2 = contacttobeadded.addedContacts;
+            let add2 = [...array2];
+            add2.reverse();
+            add2.push({ _id: curruser._id, username: curruser.username, profilePic: curruser.profilePic })
+            add2.reverse();
+            let updatedcontacts2 = { $set: { addedContacts: add2 } };
+            await user.updateOne(contacttobeadded, updatedcontacts2)
+            
             res.json(curruser.addedContacts)
         }
     } catch (ex) {
@@ -98,6 +107,48 @@ module.exports.showcurrentuser = async (req, res, next) => {
         const users = await user.findOne({ username: currentuser })
         res.json(users);
         // console.log(currentuser)
+    } catch (ex) {
+        next(ex);
+    }
+}
+
+module.exports.addpfp = async (req, res, next) => {
+    try {
+
+        res.json(req.file.filename)
+        // console.log(req.file)
+    } catch (ex) {
+        next(ex)
+    }
+}
+module.exports.addpfptodb = async (req, res, next) => {
+    try {
+        const { username, profilePic } = req.body;
+        console.log(username)
+        console.log(profilePic)
+        let updated = { $set: { profilePic: profilePic } };
+        await user.updateOne(username, updated)
+res.json(username)
+    } catch (ex) {
+        next(ex)
+    }
+}
+
+module.exports.dltcontact = async (req, res, next) => {
+    try {
+        const { currentuser, contacttobeadded } = req.body;
+        const curruser = await user.findOne({ username: currentuser });
+        let array = curruser.addedContacts;
+        console.log(contacttobeadded)
+        const newArr = array.filter(object => {
+            return object.username !== contacttobeadded.username ;
+        });
+
+            let updatedcontacts = { $set: { addedContacts: newArr } };
+            await user.updateOne(curruser, updatedcontacts)
+            
+            res.json(curruser.addedContacts)
+        
     } catch (ex) {
         next(ex);
     }
