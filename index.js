@@ -5,6 +5,8 @@ const userroutes = require("./routes/userroutes")
 const messagesroute = require("./routes/messagesroute");
 const socket=require('socket.io')
 const app= express();
+const multer = require('multer');
+const { addpfp } = require("./controllers/usercontroller");
 
 const DB='mongodb+srv://heyitsmank:mankmongo@cluster0.rxgnrcs.mongodb.net/chatapp?retryWrites=true&w=majority'
 
@@ -20,6 +22,17 @@ app.use(express.json());
 app.use("/api/auth",userroutes); 
 app.use("/api/messages",messagesroute); 
 
+const storage=multer.diskStorage({
+    destination:(req,file,cb)=>{
+        cb(null,"../public/src/uploadedImage")
+    },
+    filename:(req,file,cb)=>{
+        cb(null,Date.now()+file.originalname)
+    }
+})
+const upload = multer({storage:storage});
+
+app.post("/api/auth/addpfp",upload.single("image"),addpfp)
 
 mongoose.connect(DB).then(()=>{
     console.log("db connected")
@@ -49,7 +62,7 @@ io.on('connection',(socket)=>{
         const sendusersocket=onlineUsers.get(data.to);
     
         if(sendusersocket){
-            socket.to(sendusersocket).emit("msg-recieve",data.message);
+            socket.to(sendusersocket).emit("msg-recieve",data);
              
         } 
     });
