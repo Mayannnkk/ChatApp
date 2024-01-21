@@ -1,13 +1,15 @@
 const messagemodel = require("../model/messagemodel")
+const multer = require('multer')
+const fs=require('fs')
 
 module.exports.addmessage = async (req, res, next) => {
     try {
-        const { from, to, message } = req.body;
+        const { from, to, message,image } = req.body;
         const data = await messagemodel.insertMany({
-            message: { text: message },
+            message: { text: message , image: image },
             users: [from, to],
-            sender: from
-        });
+            sender: from,
+        }); 
         if (data) return res.json({ msg: "message added successfully" });
         else return res.json({ msg: "failed to add message to the database" });
     } catch (ex) {
@@ -59,5 +61,16 @@ module.exports.clearallchats = async (req, res, next) => {
 
     } catch (ex) {
         console.log(ex)
+    }
+}
+
+
+module.exports.addimage = async (req, res, next) => {
+    try {
+        
+        res.json(req.file.filename)
+        
+    } catch (ex) {
+        next(ex)
     }
 }
