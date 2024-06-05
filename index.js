@@ -15,7 +15,7 @@ app.get("/",(req,res)=>{
     res.send("backend is running")
 })
 app.use(cors({
-    origin:["https://letschat.onrender.com"]
+    origin:["https://onlychat.onrender.com"]
 }))  
 app.use(express.json());
 
@@ -46,7 +46,7 @@ const server =app.listen(5000,()=>{
 
 const io= socket(server,{
     cors:{
-        origin:"https://letschat.onrender.com"
+        origin:"https://onlychat.onrender.com"
     }
 });
 
