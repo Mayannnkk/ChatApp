@@ -17,6 +17,7 @@ app.get("/",(req,res)=>{
 app.use(cors({
     origin:["https://onlychat.onrender.com"]
 }))  
+
 app.use(express.json());
 
 app.use("/api/auth",userroutes); 
